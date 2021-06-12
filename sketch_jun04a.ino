@@ -29,7 +29,7 @@ struct CallData {
   byte size;
   byte chksum;
   byte mode;
-} callData;
+} callData = {0xff, 0xfe, 0x00, 0x02, 0x00, 0xa1};
 
 byte recvbuff[20];
 
@@ -65,6 +65,8 @@ struct ADUData {
 #pragma pack(pop)
 
 int man_code = 0x02E5;
+int set_code = 0x03E5;
+
 void setManData(String c, int c_size, BLEAdvertisementData &adv, int m_code) {
   String s;
   char b2 = (char)(m_code >> 8);
@@ -95,7 +97,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       unsigned int binary_length = decode_base64((unsigned char*)value.c_str(), iocontrol);
       Serial2.flush();
       Serial2.write(iocontrol, binary_length);
-      delay(50);
+      delay(1);
     }
 };
 
@@ -107,14 +109,7 @@ void setup() {
   M5.dis.drawpix(0, 0xf00000);
   Serial.println(F("init succeeded."));
 
-  callData.head1 = 0xff;
-  callData.head2 = 0xfe;
-  callData.id = 0x00;
-  callData.size = 0x02;
-  callData.mode = 0xa1;
-
   BLEDevice::init("COAI");
-//  BLEDevice::setPower(ESP_PWR_LVL_N14);
   esp_ble_tx_power_set( ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_N14 );
   
   pServer = BLEDevice::createServer();
@@ -252,7 +247,7 @@ void loop() {
 //      if(deviceConnected)
 //        pServer->disconnectClient();
     }
-    delay(20);
+    delay(1);
   }
 
   readSerial();
